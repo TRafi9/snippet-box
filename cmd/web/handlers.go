@@ -13,14 +13,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl.html",
+	}
+	//INFO using ... means the arg is variadic (we can pass multiple args into it)
+	// variadic = arg is of indefinite arity (arity us bynver if args taken  by a func)
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	// last param in ts.Execute represents any dynamic data we want to pass in
-	err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil)
 
 	if err != nil {
 		log.Print(err.Error())
