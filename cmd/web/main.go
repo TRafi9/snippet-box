@@ -2,14 +2,17 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	mux := http.NewServeMux()
 	// Create a file server which serves files out of the "./ui/static" directory.
 	// Note that the path given to the http.Dir function is relative to the project
@@ -25,8 +28,10 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	log.Print("starting server on :4000")
-	log.Printf("starting server on %s", *addr)
+	logger.Info("starting server", "addr", *addr)
+
+	//TODO can also store these in viper config struct and load them in
 	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	logger.Error(err.Error())
+	os.Exit(1)
 }
